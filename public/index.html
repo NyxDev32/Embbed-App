@@ -1411,7 +1411,7 @@ async function sendMsg(){
   }
   if(msgMode==='cv2'&&!(payload.components||[]).length){showToast('Tambah minimal satu block','err');return}
   if(/ 4000|6000/.test($('pvCount').textContent)&&$('pvCount').classList.contains('warn')){showToast('Teks melebihi batas Discord','err');return}
-  btn.disabled=true;btn.innerHTML=ic('loader','spin t')+'MENGIRIM...';
+  btns.forEach(b=>{b.disabled=true; b.innerHTML=ic('loader','spin t')+'MENGIRIM...';});
   try{
     const res=await fetch(url,{method:'POST',headers,body:JSON.stringify(payload)});
     if(res.ok){showToast('✓ Terkirim!','ok');addHist()}
