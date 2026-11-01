@@ -600,7 +600,7 @@ label,lbl{color:#9aa0bb}
 
 <!-- BG VIDEO (load dari folder yang sama) -->
 <video id="bgVid" autoplay muted loop playsinline preload="auto" disablepictureinpicture aria-hidden="true"></video>
-<audio id="bgm" src="lagu.mp3" loop preload="auto"></audio>
+<audio id="bgm" loop preload="auto"></audio>
 <div class="bg-darken"></div>
 <div class="gate" id="gate"><div class="gate-in"><span class="dia"></span><h2>Nyx</h2><p>Halaman ini punya musik latar. Ketuk masuk untuk memulai.</p><button class="btn-o" onclick="enterSite(true)">Masuk + putar musik</button><button class="gate-skip" onclick="enterSite(false)">Masuk tanpa musik</button></div></div>
 
@@ -1652,9 +1652,18 @@ window.addEventListener('load',()=>{
   a.volume=.6;
   const ui=()=>{const p=!a.paused;b.classList.toggle('on',p);b.setAttribute('aria-pressed',p);lbl.textContent=p?'Musik on':'Musik off'};
   a.addEventListener('play',ui);a.addEventListener('pause',ui);
-  a.addEventListener('error',()=>{lbl.textContent='Lagu?';b.title='File lagu.mp3 tidak ditemukan di folder yang sama dengan index.html'});
+  // >>> TEMPEL LINK CATBOX DI SINI (contoh: 'https://files.catbox.moe/abc123.mp3'). Kosongkan kalau pakai lagu.mp3 saja.
+  const LINK_LAGU='https://files.catbox.moe/wc65vn.mp3';
+  const srcs=[LINK_LAGU.trim(),'lagu.mp3'].filter(Boolean);let si=0;
+  const setSrc=()=>{a.src=srcs[si];a.load()};
+  a.addEventListener('error',()=>{
+    if(si<srcs.length-1){si++;setSrc();if(want&&gate.classList.contains('hide'))tryPlay();return}
+    lbl.textContent='Lagu?';b.title='Lagu tidak bisa dimuat';
+    if(window.showToast)showToast('Lagu gagal dimuat. Cek link catbox / file lagu.mp3','err');
+  });
+  setSrc();
   const save=v=>{try{localStorage.setItem('nyx_music',v?'1':'0')}catch(e){}};
-  const tryPlay=()=>{const p=a.play();if(p&&p.catch)p.catch(()=>{})};
+  const tryPlay=()=>{const p=a.play();if(p&&p.catch)p.catch(e=>{if(e&&e.name!=='AbortError'&&window.showToast)showToast('Lagu tidak bisa diputar ('+e.name+')','err')})};
   window.enterSite=on=>{want=on;save(on);gate.classList.add('hide');if(on)tryPlay()};
   window.toggleMusic=()=>{if(a.paused){want=true;save(true);tryPlay()}else{want=false;save(false);a.pause()}};
   if(!want)gate.classList.add('hide');
